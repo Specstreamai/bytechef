@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 import com.bytechef.automation.configuration.security.AutomationMethodSecurityExpressionHandler;
 import com.bytechef.automation.configuration.security.AutomationPermissionEvaluator;
 import com.bytechef.automation.configuration.service.PermissionService;
+import com.bytechef.config.ApplicationProperties;
 import com.bytechef.ee.platform.customcomponent.configuration.domain.CustomComponent.Language;
 import com.bytechef.ee.platform.customcomponent.configuration.service.CustomComponentService;
 import com.bytechef.ee.platform.customcomponent.file.storage.CustomComponentFileStorage;
@@ -150,9 +151,17 @@ class CustomComponentFacadeTest {
 
         preAuthorizeAuthorizationManager.setExpressionHandler(expressionHandler);
 
+        ApplicationProperties applicationProperties = new ApplicationProperties();
+
+        ApplicationProperties.Component component = applicationProperties.getComponent();
+
+        ApplicationProperties.Component.CustomComponent customComponent = component.getCustomComponent();
+
+        customComponent.setJavaEnabled(true);
+
         ProxyFactory proxyFactory = new ProxyFactory(
             new CustomComponentFacadeImpl(
-                mock(CacheManager.class), customComponentService, customComponentFileStorage));
+                applicationProperties, mock(CacheManager.class), customComponentService, customComponentFileStorage));
 
         proxyFactory.addAdvisor(
             AuthorizationManagerBeforeMethodInterceptor.preAuthorize(preAuthorizeAuthorizationManager));
