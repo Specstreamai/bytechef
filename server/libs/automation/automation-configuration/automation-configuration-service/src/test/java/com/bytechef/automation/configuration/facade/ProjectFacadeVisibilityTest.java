@@ -30,6 +30,7 @@ import com.bytechef.automation.configuration.dto.ProjectDTO;
 import com.bytechef.automation.configuration.security.ProjectVisibilityFilter;
 import com.bytechef.automation.configuration.security.ProjectVisibilityPolicy;
 import com.bytechef.automation.configuration.service.PreBuiltTemplateService;
+import com.bytechef.automation.configuration.service.ProjectCodeWorkflowInfoSupplier;
 import com.bytechef.automation.configuration.service.ProjectDeploymentService;
 import com.bytechef.automation.configuration.service.ProjectOwnershipService;
 import com.bytechef.automation.configuration.service.ProjectService;
@@ -208,7 +209,8 @@ class ProjectFacadeVisibilityTest {
 
         return new ProjectFacadeImpl(
             edition, mock(ApplicationProperties.class), mock(CategoryService.class),
-            mock(ComponentDefinitionHelper.class), mock(PreBuiltTemplateService.class), projectWorkflowService,
+            mock(ComponentDefinitionHelper.class), mock(PreBuiltTemplateService.class),
+            emptyProjectCodeWorkflowInfoSupplierProvider(), projectWorkflowService,
             mock(ProjectDeploymentService.class), mock(ProjectOwnershipService.class), projectService,
             new ProjectVisibilityFilter(objectProvider(resourceVisibilityResolver)),
             resourceVisibilityPolicyRegistry,
@@ -222,6 +224,11 @@ class ProjectFacadeVisibilityTest {
         project.setId(id);
 
         return project;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static ObjectProvider<ProjectCodeWorkflowInfoSupplier> emptyProjectCodeWorkflowInfoSupplierProvider() {
+        return mock(ObjectProvider.class);
     }
 
     @SuppressWarnings("unchecked")

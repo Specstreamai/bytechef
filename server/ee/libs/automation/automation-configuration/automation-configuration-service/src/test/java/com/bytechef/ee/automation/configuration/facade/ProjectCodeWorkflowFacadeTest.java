@@ -18,21 +18,27 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bytechef.automation.configuration.domain.Project;
+import com.bytechef.automation.configuration.facade.ProjectDeploymentFacade;
+import com.bytechef.automation.configuration.facade.ProjectFacade;
 import com.bytechef.automation.configuration.security.AutomationMethodSecurityExpressionHandler;
 import com.bytechef.automation.configuration.security.AutomationPermissionEvaluator;
 import com.bytechef.automation.configuration.service.PermissionService;
+import com.bytechef.automation.configuration.service.ProjectDeploymentService;
+import com.bytechef.automation.configuration.service.ProjectDeploymentWorkflowService;
 import com.bytechef.automation.configuration.service.ProjectService;
 import com.bytechef.automation.configuration.service.ProjectWorkflowService;
 import com.bytechef.automation.project.ProjectHandler;
 import com.bytechef.automation.project.definition.ProjectDefinition;
+import com.bytechef.config.ApplicationProperties;
+import com.bytechef.ee.automation.configuration.service.ProjectCodeWorkflowDraftService;
 import com.bytechef.ee.automation.configuration.service.ProjectCodeWorkflowService;
-import com.bytechef.ee.platform.codeworkflow.configuration.domain.CodeWorkflowContainer;
 import com.bytechef.ee.platform.codeworkflow.configuration.domain.CodeWorkflowContainer.Language;
-import com.bytechef.ee.platform.codeworkflow.configuration.facade.CodeWorkflowContainerFacade;
+import com.bytechef.ee.platform.codeworkflow.configuration.service.CodeWorkflowContainerService;
+import com.bytechef.ee.platform.codeworkflow.file.storage.CodeWorkflowFileStorage;
 import com.bytechef.platform.codeworkflow.loader.automation.ProjectHandlerLoader;
 import com.bytechef.platform.security.web.expression.MethodSecurityExpressionContributor;
+import com.bytechef.platform.tag.service.TagService;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -59,14 +65,18 @@ class ProjectCodeWorkflowFacadeTest {
     private static final String PROJECT_NAME = "orders";
     private static final long WORKSPACE_ID = 42L;
     private static final String RESOURCE_TYPE = "Workspace";
-    private final CodeWorkflowContainerFacade codeWorkflowContainerFacade = mock(CodeWorkflowContainerFacade.class);
+    private final ProjectCodeWorkflowDraftService projectCodeWorkflowDraftService =
+        mock(ProjectCodeWorkflowDraftService.class);
     private final ProjectCodeWorkflowService projectCodeWorkflowService = mock(ProjectCodeWorkflowService.class);
+    private final ProjectFacade projectFacade = mock(ProjectFacade.class);
     private final ProjectService projectService = mock(ProjectService.class);
     private final ProjectWorkflowService projectWorkflowService = mock(ProjectWorkflowService.class);
 
     private final ProjectCodeWorkflowFacadeImpl projectCodeWorkflowFacade = new ProjectCodeWorkflowFacadeImpl(
-        mock(CacheManager.class), projectService, projectWorkflowService, codeWorkflowContainerFacade,
-        projectCodeWorkflowService);
+        applicationProperties(), mock(CacheManager.class), projectService, projectWorkflowService, projectFacade,
+        projectCodeWorkflowService, mock(CodeWorkflowContainerService.class), mock(CodeWorkflowFileStorage.class),
+        projectCodeWorkflowDraftService, mock(TagService.class), mock(ProjectDeploymentFacade.class),
+        mock(ProjectDeploymentService.class), mock(ProjectDeploymentWorkflowService.class));
 
     @Test
     void testSaveCreatesTheProjectInTheWorkspaceWhenTheWorkspaceHasNoProjectOfThatName() {
@@ -88,7 +98,8 @@ class ProjectCodeWorkflowFacadeTest {
         assertThat(project.getWorkspaceId()).isEqualTo(WORKSPACE_ID);
 
         verify(projectService, never()).update(any(Project.class));
-        verify(projectService).publishProject(7L, null, false);
+        verify(projectCodeWorkflowDraftService).saveDraft(any(Project.class), any(), any(), any());
+        verify(projectFacade).publishProject(7L, null, false);
     }
 
     @Test
@@ -105,7 +116,8 @@ class ProjectCodeWorkflowFacadeTest {
 
         verify(projectService).update(existingProject);
         verify(projectService, never()).create(any(Project.class));
-        verify(projectService).publishProject(9L, null, false);
+        verify(projectCodeWorkflowDraftService).saveDraft(any(Project.class), any(), any(), any());
+        verify(projectFacade).publishProject(9L, null, false);
     }
 
     private void save() {
@@ -117,12 +129,6 @@ class ProjectCodeWorkflowFacadeTest {
         ProjectHandler projectHandler = mock(ProjectHandler.class);
 
         when(projectHandler.getDefinition()).thenReturn(projectDefinition);
-
-        CodeWorkflowContainer codeWorkflowContainer = mock(CodeWorkflowContainer.class);
-
-        when(codeWorkflowContainer.getWorkflowNameIds()).thenReturn(Map.of());
-        when(codeWorkflowContainerFacade.create(any(), any(), any(), any(), any(), any()))
-            .thenReturn(codeWorkflowContainer);
 
         try (MockedStatic<ProjectHandlerLoader> projectHandlerLoaderMockedStatic =
             mockStatic(ProjectHandlerLoader.class)) {
@@ -188,6 +194,19 @@ class ProjectCodeWorkflowFacadeTest {
         } finally {
             SecurityContextHolder.clearContext();
         }
+    }
+
+    private static ApplicationProperties applicationProperties() {
+        ApplicationProperties.Workflow workflow = new ApplicationProperties.Workflow();
+
+        workflow.getCodeWorkflow()
+            .setJavaEnabled(true);
+
+        ApplicationProperties applicationProperties = mock(ApplicationProperties.class);
+
+        when(applicationProperties.getWorkflow()).thenReturn(workflow);
+
+        return applicationProperties;
     }
 
     private ProjectCodeWorkflowFacade secure(PermissionService permissionService) {
