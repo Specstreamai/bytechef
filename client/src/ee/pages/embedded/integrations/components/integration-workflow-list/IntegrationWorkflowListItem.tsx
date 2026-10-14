@@ -17,9 +17,11 @@ import {
 } from '@/shared/middleware/graphql';
 import {ComponentDefinitionBasic} from '@/shared/middleware/platform/configuration';
 import {WorkflowTestConfigurationKeys} from '@/shared/queries/platform/workflowTestConfigurations.queries';
+import {isJavaCodeWorkflow} from '@/shared/util/codeWorkflowLanguage-utils';
 import {useQueryClient} from '@tanstack/react-query';
 import {MouseEvent, useEffect, useRef, useState} from 'react';
 import {Link, useNavigate, useSearchParams} from 'react-router-dom';
+import {twMerge} from 'tailwind-merge';
 
 const IntegrationWorkflowListItem = ({
     filteredComponentNames,
@@ -39,6 +41,8 @@ const IntegrationWorkflowListItem = ({
     };
 }) => {
     const [isPermissionExpressionSeeded, setIsPermissionExpressionSeeded] = useState(false);
+    const javaCodeWorkflow = isJavaCodeWorkflow(integration.codeWorkflow, integration.codeWorkflowLanguage);
+
     const [permissionExpression, setPermissionExpression] = useState<string | null>('');
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
@@ -146,7 +150,10 @@ const IntegrationWorkflowListItem = ({
             return;
         }
 
-        if (target.closest('a, button:not([data-slot="tooltip-trigger"]), [role="menu"], [role="menuitem"]')) {
+        if (
+            javaCodeWorkflow ||
+            target.closest('a, button:not([data-slot="tooltip-trigger"]), [role="menu"], [role="menuitem"]')
+        ) {
             return;
         }
 
@@ -160,7 +167,12 @@ const IntegrationWorkflowListItem = ({
             onClick={handleWorkflowListItemClick}
             role="presentation"
         >
-            <Link className="flex flex-1 items-center" to={workflowUrl}>
+            <Link
+                aria-disabled={javaCodeWorkflow || undefined}
+                className={twMerge('flex flex-1 items-center', javaCodeWorkflow && 'pointer-events-none')}
+                tabIndex={javaCodeWorkflow ? -1 : undefined}
+                to={workflowUrl}
+            >
                 <div className="flex w-80 items-center gap-2 text-sm font-semibold">
                     <span className="underline-offset-4 group-hover/row:text-content-brand-primary group-hover/row:underline">
                         {workflow.label}
@@ -187,19 +199,21 @@ const IntegrationWorkflowListItem = ({
                     <TooltipContent>Last Modified Date</TooltipContent>
                 </Tooltip>
 
-                <WorkflowListRowDropdownMenu
-                    exportUrl={`/api/embedded/internal/workflows/${workflow.id}/export`}
-                    onDeleteClick={canDeleteWorkflow ? () => setShowDeleteDialog(true) : undefined}
-                    onEditClick={
-                        canEditWorkflow
-                            ? () => {
-                                  setIsPermissionExpressionSeeded(false);
-                                  setShowEditDialog(true);
-                              }
-                            : undefined
-                    }
-                    workflowLabel={workflow.label}
-                />
+                {!integration.codeWorkflow && (
+                    <WorkflowListRowDropdownMenu
+                        exportUrl={`/api/embedded/internal/workflows/${workflow.id}/export`}
+                        onDeleteClick={canDeleteWorkflow ? () => setShowDeleteDialog(true) : undefined}
+                        onEditClick={
+                            canEditWorkflow
+                                ? () => {
+                                      setIsPermissionExpressionSeeded(false);
+                                      setShowEditDialog(true);
+                                  }
+                                : undefined
+                        }
+                        workflowLabel={workflow.label}
+                    />
+                )}
             </div>
 
             {showDeleteDialog && (

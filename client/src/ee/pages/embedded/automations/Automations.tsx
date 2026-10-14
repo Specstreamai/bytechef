@@ -2,7 +2,10 @@ import Button from '@/components/Button/Button';
 import EmptyState from '@/components/EmptyState/EmptyState';
 import JourneySteps from '@/components/JourneySteps/JourneySteps';
 import PageLoader from '@/components/PageLoader';
+import {ButtonGroup} from '@/components/ui/button-group';
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/dropdown-menu';
 import ProjectsFilterTitle from '@/pages/automation/projects/components/ProjectsFilterTitle';
+import ImportCodeWorkflowDialog from '@/pages/platform/code-workflow/components/ImportCodeWorkflowDialog';
 import {DEVELOPMENT_ENVIRONMENT} from '@/shared/constants';
 import {UNION_ENVIRONMENT_ID, useHasEmbeddedScope} from '@/shared/hooks/useHasEmbeddedScope';
 import {useInitialLoadComplete} from '@/shared/hooks/useInitialLoadComplete';
@@ -10,9 +13,11 @@ import Header from '@/shared/layout/Header';
 import LayoutContainer from '@/shared/layout/LayoutContainer';
 import {
     AutomationProjectsQuery,
+    CodeWorkflowLanguage,
     useAutomationProjectCategoriesQuery,
     useAutomationProjectTagsQuery,
     useAutomationProjectsQuery,
+    useCreateAutomationProjectCodeWorkflowMutation,
     useCreateAutomationProjectMutation,
     useCreateAutomationProjectWorkflowMutation,
     useDeleteAutomationProjectWorkflowMutation,
@@ -21,7 +26,7 @@ import {
     useUpdateAutomationProjectWorkflowPermissionExpressionMutation,
 } from '@/shared/middleware/graphql';
 import {useQueryClient} from '@tanstack/react-query';
-import {FilterXIcon, FolderIcon} from 'lucide-react';
+import {ChevronDownIcon, CodeIcon, FileUpIcon, FilterXIcon, FolderIcon, PlusIcon} from 'lucide-react';
 import {ChangeEvent, useRef, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 
@@ -34,6 +39,7 @@ import AutomationProjectList from './components/automation-project-list/Automati
 import AutomationProjectsFilterSidebar, {
     AutomationProjectFilterType,
 } from './components/automation-projects-filter-sidebar/AutomationProjectsFilterSidebar';
+import isEditableCodeLanguage from './utils/isEditableCodeLanguage';
 
 type AutomationProjectType = AutomationProjectsQuery['automationProjects'][number];
 
@@ -48,6 +54,8 @@ const Automations = () => {
     const [editWorkflow, setEditWorkflow] = useState<AutomationProjectType['workflowTemplates'][number] | undefined>();
     const [newlyCreatedProjectId, setNewlyCreatedProjectId] = useState<string | undefined>();
     const [pendingWorkflowProjectId, setPendingWorkflowProjectId] = useState<string | null>(null);
+    const [showCodeProjectDialog, setShowCodeProjectDialog] = useState(false);
+    const [showImportCodeWorkflowDialog, setShowImportCodeWorkflowDialog] = useState(false);
     const [showProjectDialog, setShowProjectDialog] = useState(false);
     const [showWorkflowDialog, setShowWorkflowDialog] = useState(false);
 
@@ -102,6 +110,7 @@ const Automations = () => {
 
     const isFirstRun = !projectsIsLoading && !hasActiveFilter && !hasProjects;
 
+    const createCodeWorkflowMutation = useCreateAutomationProjectCodeWorkflowMutation();
     const createProjectMutation = useCreateAutomationProjectMutation();
     const createWorkflowMutation = useCreateAutomationProjectWorkflowMutation();
     const deleteWorkflowMutation = useDeleteAutomationProjectWorkflowMutation();
@@ -111,7 +120,6 @@ const Automations = () => {
     const canCreateProject = useHasEmbeddedScope('INTEGRATION_CREATE', UNION_ENVIRONMENT_ID);
     const canManageSettings = useHasEmbeddedScope('INTEGRATION_SETTINGS', UNION_ENVIRONMENT_ID);
 
-
     const invalidateProjects = () => {
         void queryClient.invalidateQueries({queryKey: ['automationProjectCategories']});
         void queryClient.invalidateQueries({queryKey: ['automationProjectTags']});
@@ -119,6 +127,19 @@ const Automations = () => {
     };
 
     const openWorkflowEditor = (workflowUuid: string) => {
+        const codeProject = projects.find(
+            (project) =>
+                project.codeWorkflowProject &&
+                isEditableCodeLanguage(project.codeWorkflowLanguage) &&
+                project.workflowTemplates.some((workflowTemplate) => workflowTemplate.workflowUuid === workflowUuid)
+        );
+
+        if (codeProject) {
+            void navigate(`/embedded/automations/projects/${codeProject.id}/code`);
+
+            return;
+        }
+
         void navigate(`/embedded/automations/${workflowUuid}/editor`);
     };
 
@@ -319,7 +340,34 @@ const Automations = () => {
                         position="main"
                         right={
                             canCreateProject && (
-                                <Button aria-label="New Project" label="New Project" onClick={handleNewProject} />
+                                <ButtonGroup>
+                                    <Button aria-label="New Project" label="New Project" onClick={handleNewProject} />
+
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button aria-label="More project options">
+                                                <ChevronDownIcon />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem onClick={handleNewProject}>
+                                                <PlusIcon className="mr-2 size-4" />
+                                                New Project
+                                            </DropdownMenuItem>
+
+                                            <DropdownMenuItem onClick={() => setShowCodeProjectDialog(true)}>
+                                                <CodeIcon className="mr-2 size-4" />
+                                                New Code Project
+                                            </DropdownMenuItem>
+
+                                            <DropdownMenuItem onClick={() => setShowImportCodeWorkflowDialog(true)}>
+                                                <FileUpIcon className="mr-2 size-4" />
+                                                Import Code Project
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </ButtonGroup>
                             )
                         }
                         title={
@@ -355,6 +403,9 @@ const Automations = () => {
                         onCreateWorkflow={handleCreateWorkflow}
                         onDeleteWorkflow={handleDeleteWorkflow}
                         onEditProject={handleEditProject}
+                        onEditProjectSource={(projectId) =>
+                            navigate(`/embedded/automations/projects/${projectId}/code`)
+                        }
                         onEditWorkflow={handleEditWorkflow}
                         onImportWorkflow={handleImportWorkflow}
                         onSelectWorkflow={openWorkflowEditor}
@@ -370,7 +421,36 @@ const Automations = () => {
                     />
                 ) : canCreateProject ? (
                     <EmptyState
-                        actions={<Button label="Create Project" onClick={handleNewProject} />}
+                        actions={
+                            <ButtonGroup className="mx-auto">
+                                <Button aria-label="Create Project" label="Create Project" onClick={handleNewProject} />
+
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button aria-label="More project options">
+                                            <ChevronDownIcon />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={handleNewProject}>
+                                            <PlusIcon className="mr-2 size-4" />
+                                            New Project
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuItem onClick={() => setShowCodeProjectDialog(true)}>
+                                            <CodeIcon className="mr-2 size-4" />
+                                            New Code Project
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuItem onClick={() => setShowImportCodeWorkflowDialog(true)}>
+                                            <FileUpIcon className="mr-2 size-4" />
+                                            Import Code Project
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </ButtonGroup>
+                        }
                         description="A project groups the workflow templates that ship with your product. Your connected users start from these templates and adjust their own copies in the embedded workflow builder."
                         icon={<FolderIcon />}
                         title="Create your first project"
@@ -378,13 +458,52 @@ const Automations = () => {
                         <JourneySteps aria-label="Getting started" steps={AUTOMATION_STEPS} />
                     </EmptyState>
                 ) : (
-                    <EmptyState
-                        description="There are no projects yet."
-                        icon={<FolderIcon />}
-                        title="No Projects"
-                    />
+                    <EmptyState description="There are no projects yet." icon={<FolderIcon />} title="No Projects" />
                 )}
             </PageLoader>
+
+            {showImportCodeWorkflowDialog && (
+                <ImportCodeWorkflowDialog
+                    deployUrl="/api/embedded/internal/automation/projects/deploy"
+                    description="Upload a built code project. If a project with the same name exists, it is redeployed and every connected user referencing it gets the new version. Unpublished edits made in the editor are replaced."
+                    fileFieldName="projectFile"
+                    onClose={() => setShowImportCodeWorkflowDialog(false)}
+                    onImported={invalidateProjects}
+                    title="Import Code Project"
+                />
+            )}
+
+            {showCodeProjectDialog && (
+                <AutomationProjectDialog
+                    categories={categories}
+                    codeWorkflow
+                    onClose={() => setShowCodeProjectDialog(false)}
+                    onSubmit={(values) =>
+                        createCodeWorkflowMutation.mutate(
+                            {
+                                category: values.category || undefined,
+                                description: values.description || undefined,
+                                language: values.language || CodeWorkflowLanguage.Javascript,
+                                name: values.name,
+                                permissionExpression: values.permissionExpression,
+                                tags: values.tags,
+                            },
+                            {
+                                onSuccess: (data) => {
+                                    invalidateProjects();
+
+                                    setShowCodeProjectDialog(false);
+
+                                    void navigate(
+                                        `/embedded/automations/projects/${data.createAutomationProjectCodeWorkflow}/code`
+                                    );
+                                },
+                            }
+                        )
+                    }
+                    tags={tags}
+                />
+            )}
 
             {showProjectDialog && (
                 <AutomationProjectDialog

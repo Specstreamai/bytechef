@@ -15,6 +15,7 @@ type AutomationProjectWorkflowTemplateType =
     AutomationProjectsQuery['automationProjects'][number]['workflowTemplates'][number];
 
 interface AutomationProjectWorkflowListItemProps {
+    codeWorkflowProject?: boolean;
     onDeleteWorkflow: (workflowUuid: string) => void;
     onEditWorkflow: (workflow: AutomationProjectWorkflowTemplateType) => void;
     onSelectWorkflow: (workflowUuid: string) => void;
@@ -22,6 +23,7 @@ interface AutomationProjectWorkflowListItemProps {
 }
 
 const AutomationProjectWorkflowListItem = ({
+    codeWorkflowProject = false,
     onDeleteWorkflow,
     onEditWorkflow,
     onSelectWorkflow,
@@ -138,7 +140,11 @@ const AutomationProjectWorkflowListItem = ({
 
                 <WorkflowListRowDropdownMenu
                     exportUrl={`/api/automation/internal/workflows/${workflow.workflowId}/export`}
-                    onDeleteClick={canDeleteWorkflow ? () => onDeleteWorkflow(workflow.workflowUuid) : undefined}
+                    onDeleteClick={
+                        canDeleteWorkflow && !codeWorkflowProject
+                            ? () => onDeleteWorkflow(workflow.workflowUuid)
+                            : undefined
+                    }
                     onEditClick={canEditWorkflow ? () => onEditWorkflow(workflow) : undefined}
                     workflowLabel={workflow.label || workflow.workflowUuid}
                 >

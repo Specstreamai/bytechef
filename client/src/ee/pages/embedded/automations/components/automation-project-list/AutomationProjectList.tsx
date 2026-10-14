@@ -35,6 +35,7 @@ interface AutomationProjectListProps {
     onCreateWorkflow: (projectId: string) => void;
     onDeleteWorkflow: (workflowUuid: string) => void;
     onEditProject: (project: AutomationProjectType) => void;
+    onEditProjectSource: (projectId: string) => void;
     onEditWorkflow: (workflow: AutomationProjectType['workflowTemplates'][number]) => void;
     onImportWorkflow: (projectId: string) => void;
     onSelectWorkflow: (workflowUuid: string) => void;
@@ -48,6 +49,7 @@ const AutomationProjectList = ({
     onCreateWorkflow,
     onDeleteWorkflow,
     onEditProject,
+    onEditProjectSource,
     onEditWorkflow,
     onImportWorkflow,
     onSelectWorkflow,
@@ -126,6 +128,7 @@ const AutomationProjectList = ({
                         onCreateConfiguration={(selectedProject) => setConfigurationDialog({project: selectedProject})}
                         onCreateWorkflow={onCreateWorkflow}
                         onEditProject={onEditProject}
+                        onEditProjectSource={onEditProjectSource}
                         onImportWorkflow={onImportWorkflow}
                         onPublishProject={() => setPublishDialogProject(project)}
                         onSelectWorkflow={onSelectWorkflow}
@@ -138,7 +141,8 @@ const AutomationProjectList = ({
                         <AutomationProjectListItemTabs
                             actions={
                                 (activeTabs[project.id] || 'workflows') === 'workflows'
-                                    ? project.workflowTemplates.length > 0 &&
+                                    ? !project.codeWorkflowProject &&
+                                      project.workflowTemplates.length > 0 &&
                                       canCreateWorkflow && (
                                           <ButtonGroup aria-label="Workflow Creation Actions">
                                               <Button

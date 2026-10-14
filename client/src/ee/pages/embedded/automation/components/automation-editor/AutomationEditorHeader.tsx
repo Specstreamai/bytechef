@@ -404,6 +404,7 @@ const AutomationEditorHeader = ({
                 <OutputButton onShowOutputClick={handleShowOutputClick} />
 
                 <AutomationEditorSettingsMenu
+                    codeWorkflowProject={project.codeWorkflowProject}
                     onDeleteProjectClick={handleDeleteProjectClick}
                     onDeleteWorkflowClick={handleDeleteWorkflowClick}
                     onDuplicateProjectClick={handleDuplicateProjectClick}

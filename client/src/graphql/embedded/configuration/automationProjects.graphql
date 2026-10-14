@@ -9,6 +9,9 @@ query automationProjects($environmentId: ID) {
         version
         lastPublishedVersion
         permissionExpression
+        codeWorkflowProject
+        codeWorkflowLanguage
+        codeWorkflowDraftPublishable
         configurationCount
         lastPublishedDate
         workflowTemplates {
@@ -82,10 +85,7 @@ mutation updateAutomationProjectWorkflow($workflowUuid: ID!, $label: String!, $d
     updateAutomationProjectWorkflow(workflowUuid: $workflowUuid, label: $label, description: $description)
 }
 
-mutation updateAutomationProjectWorkflowPermissionExpression(
-    $workflowUuid: ID!
-    $permissionExpression: String
-) {
+mutation updateAutomationProjectWorkflowPermissionExpression($workflowUuid: ID!, $permissionExpression: String) {
     updateAutomationProjectWorkflowPermissionExpression(
         workflowUuid: $workflowUuid
         permissionExpression: $permissionExpression
