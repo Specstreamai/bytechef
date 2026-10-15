@@ -198,7 +198,12 @@ const Automation = () => {
                                 <WorkflowEditorProvider
                                     value={{
                                         ConnectionKeys: ConnectionKeys,
+                                        automationProjectId: currentProject?.codeWorkflowProject
+                                            ? projectId
+                                            : undefined,
                                         cancelWorkflowQueries,
+                                        codeWorkflow: currentProject?.codeWorkflowProject,
+                                        codeWorkflowLanguage: currentProject?.codeWorkflowLanguage ?? undefined,
                                         deleteClusterElementParameterMutation,
                                         deleteWorkflowNodeParameterMutation,
                                         invalidateWorkflowQueries,
