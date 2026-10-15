@@ -48,10 +48,10 @@ public class AutomationProjectCodeWorkflowApiController implements AutomationPro
     }
 
     /**
-     * Authorization note: the {@code ROLE_ADMIN} guard lives on
-     * {@code AutomationProjectCodeWorkflowFacadeImpl#save}, exactly mirroring
-     * {@code IntegrationCodeWorkflowApiController}, so a connected-user bearer token (which carries no authorities, see
-     * {@code EmbeddedApiKeyAuthenticationProvider}) is denied at the facade regardless of what reaches this controller.
+     * Authorization note: the {@code ROLE_ADMIN} guard lives on {@code AutomationProjectCodeWorkflowFacadeImpl#save},
+     * exactly mirroring {@code IntegrationCodeWorkflowApiController}, so a connected-user bearer token (which carries
+     * no authorities, see {@code EmbeddedApiKeyAuthenticationProvider}) is denied at the facade regardless of what
+     * reaches this controller.
      */
     @Override
     public ResponseEntity<AutomationProjectCodeWorkflowDeployResultModel> deployAutomationProjectCodeWorkflow(
