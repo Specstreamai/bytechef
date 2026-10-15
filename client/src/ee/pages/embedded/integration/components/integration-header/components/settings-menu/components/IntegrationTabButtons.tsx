@@ -4,12 +4,14 @@ import {UNION_ENVIRONMENT_ID, useHasEmbeddedScope} from '@/shared/hooks/useHasEm
 import {EditIcon, HistoryIcon, PlusIcon, Trash2Icon, UploadIcon} from 'lucide-react';
 
 const IntegrationTabButtons = ({
+    codeWorkflow = false,
     onDeleteIntegrationClick,
     onImportWorkflowClick,
     onNewWorkflowClick,
     onShowEditIntegrationDialogClick,
     onShowIntegrationVersionHistorySheet,
 }: {
+    codeWorkflow?: boolean;
     onDeleteIntegrationClick: () => void;
     onImportWorkflowClick: () => void;
     onNewWorkflowClick: () => void;
@@ -30,7 +32,7 @@ const IntegrationTabButtons = ({
                 </>
             )}
 
-            {canCreateWorkflow && (
+            {canCreateWorkflow && !codeWorkflow && (
                 <>
                     <DropdownMenuItem icon={<PlusIcon />} label="New Workflow" onSelect={onNewWorkflowClick} />
 

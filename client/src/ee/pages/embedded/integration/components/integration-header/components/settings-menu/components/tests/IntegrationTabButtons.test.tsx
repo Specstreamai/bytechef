@@ -19,11 +19,11 @@ const mockProps = {
 
 const onOpenChange = vi.fn();
 
-const renderIntegrationTabButtons = () =>
+const renderIntegrationTabButtons = (props: {codeWorkflow?: boolean} = {}) =>
     render(
         <DropdownMenu onOpenChange={onOpenChange} open>
             <DropdownMenuContent>
-                <IntegrationTabButtons {...mockProps} />
+                <IntegrationTabButtons {...mockProps} {...props} />
             </DropdownMenuContent>
         </DropdownMenu>
     );
@@ -61,4 +61,14 @@ it('asks for a workflow file and closes the menu when Import Workflow is selecte
 
     expect(mockProps.onImportWorkflowClick).toHaveBeenCalled();
     expect(onOpenChange).toHaveBeenCalledWith(false);
+});
+
+it('keeps only the integration actions for a code workflow', () => {
+    renderIntegrationTabButtons({codeWorkflow: true});
+
+    expect(screen.getByRole('menuitem', {name: 'Edit'})).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', {name: 'Integration History'})).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', {name: 'Delete'})).toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', {name: 'New Workflow'})).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', {name: 'Import Workflow'})).not.toBeInTheDocument();
 });

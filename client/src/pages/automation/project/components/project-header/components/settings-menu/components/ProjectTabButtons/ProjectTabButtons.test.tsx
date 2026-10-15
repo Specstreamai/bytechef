@@ -419,3 +419,23 @@ describe('ProjectTabButtons Visibility Item', () => {
         expect(screen.queryByText('Visibility')).not.toBeInTheDocument();
     });
 });
+
+describe('ProjectTabButtons Code Workflow', () => {
+    it('should keep only the project actions that support code workflows', () => {
+        renderProjectTabButtons({...mockProps, codeWorkflow: true} as typeof mockProps);
+
+        for (const name of ['Edit', 'Share', 'Export', 'Project History', 'Delete']) {
+            expect(screen.getByRole('menuitem', {name})).toBeInTheDocument();
+        }
+
+        for (const name of [
+            'Duplicate',
+            'New Workflow',
+            'Workflow from Template',
+            'Import Workflow',
+            'Import n8n Workflow',
+        ]) {
+            expect(screen.queryByRole('menuitem', {name})).not.toBeInTheDocument();
+        }
+    });
+});

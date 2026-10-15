@@ -23,6 +23,7 @@ import {
 
 const ProjectTabButtons = ({
     canManageVisibility,
+    codeWorkflow = false,
     importN8nWorkflowDisabled,
     onDeleteProjectClick,
     onDuplicateProjectClick,
@@ -40,6 +41,7 @@ const ProjectTabButtons = ({
     projectId,
 }: {
     canManageVisibility: boolean;
+    codeWorkflow?: boolean;
     importN8nWorkflowDisabled: boolean;
     onDeleteProjectClick: () => void;
     onDuplicateProjectClick: () => void;
@@ -96,7 +98,7 @@ const ProjectTabButtons = ({
                 <DropdownMenuItem icon={<EditIcon />} label="Edit" onSelect={onShowEditProjectDialogClick} />
             )}
 
-            {canCreateProject && (
+            {canCreateProject && !codeWorkflow && (
                 <DropdownMenuItem icon={<CopyIcon />} label="Duplicate" onSelect={onDuplicateProjectClick} />
             )}
 
@@ -108,7 +110,7 @@ const ProjectTabButtons = ({
                 <DropdownMenuItem icon={<LockIcon />} label="Visibility" onSelect={onShowVisibilityDialog} />
             )}
 
-            {templatesSubmissionForm && (
+            {!codeWorkflow && templatesSubmissionForm && (
                 <DropdownMenuItem
                     icon={<Share2Icon />}
                     label="Share with Community"
@@ -124,7 +126,7 @@ const ProjectTabButtons = ({
 
             <DropdownMenuSeparator />
 
-            {canCreateWorkflow && (
+            {canCreateWorkflow && !codeWorkflow && (
                 <>
                     <DropdownMenuItem icon={<PlusIcon />} label="New Workflow" onSelect={onNewWorkflowClick} />
 
@@ -157,7 +159,7 @@ const ProjectTabButtons = ({
                 </>
             )}
 
-            {gitIntegrationEnabled && (
+            {gitIntegrationEnabled && !codeWorkflow && (
                 <EEVersion hidden={true}>
                     {canPullProjectFromGit && (
                         <DropdownMenuItem
