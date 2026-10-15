@@ -22,6 +22,7 @@ import {
     useDeleteAutomationProjectMutation,
     useDuplicateAutomationProjectMutation,
 } from '@/shared/middleware/graphql';
+import getCodeWorkflowLanguageLabel from '@/shared/util/codeWorkflowLanguage-utils';
 import {useQueryClient} from '@tanstack/react-query';
 import {
     CodeIcon,
@@ -202,6 +203,17 @@ const AutomationProjectListItem = ({
                                 >
                                     {project.name}
                                 </button>
+                            )}
+
+                            {project.codeWorkflowProject && (
+                                <Badge
+                                    label={
+                                        getCodeWorkflowLanguageLabel(project.codeWorkflowLanguage ?? undefined) ??
+                                        'Code'
+                                    }
+                                    styleType="secondary-filled"
+                                    weight="semibold"
+                                />
                             )}
                         </div>
 
