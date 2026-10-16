@@ -12,9 +12,7 @@ import com.bytechef.ee.embedded.configuration.dto.ConnectedUserWorkflowReference
 import com.bytechef.platform.annotation.ConditionalOnEEVersion;
 import com.bytechef.platform.configuration.domain.Environment;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,15 +44,16 @@ public class ConnectedUserWorkflowReferenceAdminFacadeImpl
 
     @Override
     @PreAuthorize("hasEmbeddedScope('CONNECTED_USER_VIEW')")
-    public List<ConnectedUserWorkflowReferenceDTO> getReferences(Set<String> automationUuids) {
-        Map<String, Boolean> canViewByEnvironment = new HashMap<>();
+    public List<ConnectedUserWorkflowReferenceDTO> getReferences(Set<String> automationUuids, Environment environment) {
+        if (!permissionService.hasEmbeddedScope(CONNECTED_USER_VIEW, environment)) {
+            return List.of();
+        }
+
+        String environmentName = environment.name();
 
         return connectedUserWorkflowReferenceReader.getReferences(automationUuids)
             .stream()
-            .filter(reference -> canViewByEnvironment.computeIfAbsent(
-                reference.environment(),
-                environment -> permissionService.hasEmbeddedScope(
-                    CONNECTED_USER_VIEW, Environment.valueOf(environment))))
+            .filter(reference -> environmentName.equals(reference.environment()))
             .toList();
     }
 }

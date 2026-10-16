@@ -227,7 +227,7 @@ class ConnectedUserWorkflowReferenceAdminFacadeIntTest {
         clearInvocations(connectedUserProjectService, connectedUserService);
 
         List<ConnectedUserWorkflowReferenceDTO> result = connectedUserWorkflowReferenceAdminFacade.getReferences(
-            Set.of(firstWorkflowUuid, secondWorkflowUuid));
+            Set.of(firstWorkflowUuid, secondWorkflowUuid), Environment.PRODUCTION);
 
         assertThat(result)
             .extracting(
@@ -245,6 +245,34 @@ class ConnectedUserWorkflowReferenceAdminFacadeIntTest {
 
         verify(connectedUserProjectService, times(1)).getConnectedUserProjects(anyList());
         verify(connectedUserService, times(1)).getConnectedUsers(anyList());
+    }
+
+    @Test
+    void testGetReferencesListsOnlyTheReferencesOfConnectedUsersInTheEnvironment() {
+        when(permissionService.hasEmbeddedScope(eq("CONNECTED_USER_VIEW"), any(Environment.class))).thenReturn(true);
+
+        givenSlackAutomationEnvironment();
+
+        long automationProjectId = automationProjectFacade.createProject(
+            "Admin References " + UUID.randomUUID(), "", null, List.of(), null);
+
+        String workflowUuid = automationProjectFacade.createProjectWorkflow(
+            automationProjectId, SLACK_WORKFLOW_DEFINITION, null);
+
+        publishAndPinProject(automationProjectId);
+
+        ConnectedUser connectedUser = createConnectedUserWithConnection();
+
+        connectedUserWorkflowReferenceFacade.getOrCreateReference(
+            connectedUser.getExternalId(), workflowUuid, Environment.PRODUCTION);
+
+        assertThat(
+            connectedUserWorkflowReferenceAdminFacade.getReferences(Set.of(workflowUuid), Environment.PRODUCTION))
+                .extracting(ConnectedUserWorkflowReferenceDTO::externalUserId)
+                .containsExactly(connectedUser.getExternalId());
+        assertThat(
+            connectedUserWorkflowReferenceAdminFacade.getReferences(Set.of(workflowUuid), Environment.DEVELOPMENT))
+                .isEmpty();
     }
 
     private ConnectedUser createConnectedUserWithConnection() {
