@@ -138,24 +138,24 @@ const AutomationProjectWorkflowListItem = ({
                     </Tooltip>
                 )}
 
-                <WorkflowListRowDropdownMenu
-                    exportUrl={`/api/automation/internal/workflows/${workflow.workflowId}/export`}
-                    onDeleteClick={
-                        canDeleteWorkflow && !codeWorkflowProject
-                            ? () => onDeleteWorkflow(workflow.workflowUuid)
-                            : undefined
-                    }
-                    onEditClick={canEditWorkflow ? () => onEditWorkflow(workflow) : undefined}
-                    workflowLabel={workflow.label || workflow.workflowUuid}
-                >
-                    {canCreateWorkflow && (
-                        <DropdownMenuItem
-                            icon={<CopyIcon />}
-                            label="Duplicate"
-                            onClick={() => duplicateWorkflowMutation.mutate({workflowUuid: workflow.workflowUuid})}
-                        />
-                    )}
-                </WorkflowListRowDropdownMenu>
+                {codeWorkflowProject ? (
+                    <div aria-hidden className="size-9 shrink-0" />
+                ) : (
+                    <WorkflowListRowDropdownMenu
+                        exportUrl={`/api/automation/internal/workflows/${workflow.workflowId}/export`}
+                        onDeleteClick={canDeleteWorkflow ? () => onDeleteWorkflow(workflow.workflowUuid) : undefined}
+                        onEditClick={canEditWorkflow ? () => onEditWorkflow(workflow) : undefined}
+                        workflowLabel={workflow.label || workflow.workflowUuid}
+                    >
+                        {canCreateWorkflow && (
+                            <DropdownMenuItem
+                                icon={<CopyIcon />}
+                                label="Duplicate"
+                                onClick={() => duplicateWorkflowMutation.mutate({workflowUuid: workflow.workflowUuid})}
+                            />
+                        )}
+                    </WorkflowListRowDropdownMenu>
+                )}
             </div>
         </li>
     );
