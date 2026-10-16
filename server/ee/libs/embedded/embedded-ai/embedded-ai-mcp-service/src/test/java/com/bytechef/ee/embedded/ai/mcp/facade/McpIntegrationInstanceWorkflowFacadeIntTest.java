@@ -33,6 +33,7 @@ import com.bytechef.ee.embedded.configuration.facade.IntegrationInstanceFacade;
 import com.bytechef.ee.embedded.configuration.repository.IntegrationWorkflowRepository;
 import com.bytechef.ee.embedded.configuration.security.EmbeddedPermissionEvaluator;
 import com.bytechef.ee.embedded.configuration.service.IntegrationInstanceConfigurationServiceImpl;
+import com.bytechef.ee.embedded.configuration.service.IntegrationInstanceConfigurationWorkflowServiceImpl;
 import com.bytechef.ee.embedded.configuration.service.IntegrationInstanceServiceImpl;
 import com.bytechef.ee.embedded.configuration.service.IntegrationInstanceWorkflowService;
 import com.bytechef.ee.embedded.configuration.service.IntegrationInstanceWorkflowServiceImpl;
@@ -46,6 +47,7 @@ import com.bytechef.encryption.Encryption;
 import com.bytechef.evaluator.SpelEvaluator;
 import com.bytechef.platform.component.facade.ComponentDefinitionFacade;
 import com.bytechef.platform.configuration.domain.Environment;
+import com.bytechef.platform.connection.service.ConnectionService;
 import com.bytechef.platform.constant.PlatformType;
 import com.bytechef.platform.mcp.domain.McpServer;
 import com.bytechef.platform.mcp.repository.McpComponentRepository;
@@ -105,6 +107,9 @@ class McpIntegrationInstanceWorkflowFacadeIntTest {
 
     @MockitoSpyBean
     private ConnectedUserIntegrationInstanceFacade connectedUserIntegrationInstanceFacade;
+
+    @MockitoBean
+    private ConnectionService connectionService;
 
     @Autowired
     private Encryption encryption;
@@ -503,7 +508,8 @@ class McpIntegrationInstanceWorkflowFacadeIntTest {
     @EnableMethodSecurity
     @Import({
         ConnectedUserIntegrationInstanceFacadeImpl.class, ConnectedUserServiceImpl.class, EmbeddedMcpReader.class,
-        IntegrationInstanceConfigurationServiceImpl.class, IntegrationInstanceServiceImpl.class,
+        IntegrationInstanceConfigurationServiceImpl.class,
+        IntegrationInstanceConfigurationWorkflowServiceImpl.class, IntegrationInstanceServiceImpl.class,
         IntegrationInstanceWorkflowServiceImpl.class, IntegrationServiceImpl.class,
         IntegrationWorkflowServiceImpl.class, McpComponentServiceImpl.class,
         McpIntegrationInstanceConfigurationWorkflowServiceImpl.class, McpIntegrationInstanceToolFacadeImpl.class,
