@@ -1078,6 +1078,16 @@ export type ConnectedUserAutomationProjectConfiguration = {
   projectId: Scalars['ID']['output'];
 };
 
+export type ConnectedUserCatalogWorkflowCopy = {
+  __typename?: 'ConnectedUserCatalogWorkflowCopy';
+  connectedUserEmail?: Maybe<Scalars['String']['output']>;
+  connectedUserName?: Maybe<Scalars['String']['output']>;
+  copiedFromWorkflowUuid: Scalars['ID']['output'];
+  enabled: Scalars['Boolean']['output'];
+  externalUserId: Scalars['String']['output'];
+  workflowUuid: Scalars['ID']['output'];
+};
+
 export type ConnectedUserCodeWorkflowReference = {
   __typename?: 'ConnectedUserCodeWorkflowReference';
   automationUuid: Scalars['ID']['output'];
@@ -4284,6 +4294,7 @@ export type Query = {
   componentDefinitions: Array<ComponentDefinition>;
   componentPropertyDisplayConditions: Scalars['Map']['output'];
   connectedUser?: Maybe<ConnectedUser>;
+  connectedUserCatalogWorkflowCopies: Array<ConnectedUserCatalogWorkflowCopy>;
   connectedUserCodeWorkflowReferences: Array<ConnectedUserCodeWorkflowReference>;
   connectedUserMcpServers: Array<ConnectedUserMcpServer>;
   connectedUserProjectWorkflowReferenceValues: ConnectedUserProjectWorkflowReferenceValues;
@@ -4887,6 +4898,12 @@ export type QueryComponentPropertyDisplayConditionsArgs = {
 
 export type QueryConnectedUserArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryConnectedUserCatalogWorkflowCopiesArgs = {
+  automationWorkflowUuids: Array<Scalars['ID']['input']>;
+  environmentId: Scalars['ID']['input'];
 };
 
 
