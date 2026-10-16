@@ -17,6 +17,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bytechef.atlas.configuration.service.WorkflowService;
 import com.bytechef.automation.configuration.domain.Project;
 import com.bytechef.automation.configuration.facade.ProjectDeploymentFacade;
 import com.bytechef.automation.configuration.facade.ProjectFacade;
@@ -36,6 +37,7 @@ import com.bytechef.ee.platform.codeworkflow.configuration.domain.CodeWorkflowCo
 import com.bytechef.ee.platform.codeworkflow.configuration.service.CodeWorkflowContainerService;
 import com.bytechef.ee.platform.codeworkflow.file.storage.CodeWorkflowFileStorage;
 import com.bytechef.platform.codeworkflow.loader.automation.ProjectHandlerLoader;
+import com.bytechef.platform.configuration.facade.ComponentConnectionFacade;
 import com.bytechef.platform.security.web.expression.MethodSecurityExpressionContributor;
 import com.bytechef.platform.tag.service.TagService;
 import java.util.List;
@@ -76,7 +78,8 @@ class ProjectCodeWorkflowFacadeTest {
         applicationProperties(), mock(CacheManager.class), projectService, projectWorkflowService, projectFacade,
         projectCodeWorkflowService, mock(CodeWorkflowContainerService.class), mock(CodeWorkflowFileStorage.class),
         projectCodeWorkflowDraftService, mock(TagService.class), mock(ProjectDeploymentFacade.class),
-        mock(ProjectDeploymentService.class), mock(ProjectDeploymentWorkflowService.class));
+        mock(ProjectDeploymentService.class), mock(ProjectDeploymentWorkflowService.class),
+        mock(ComponentConnectionFacade.class), mock(WorkflowService.class));
 
     @Test
     void testSaveCreatesTheProjectInTheWorkspaceWhenTheWorkspaceHasNoProjectOfThatName() {
