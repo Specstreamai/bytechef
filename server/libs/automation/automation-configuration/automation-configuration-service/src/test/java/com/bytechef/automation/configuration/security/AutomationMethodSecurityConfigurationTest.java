@@ -421,6 +421,9 @@ class AutomationMethodSecurityConfigurationTest {
             "embedded-v1:ConnectedUserProjectWorkflowApiController#enableProjectWorkflow",
             EMBEDDED_PRINCIPAL_SCOPED),
         Map.entry(
+            "embedded-v1:ConnectedUserProjectWorkflowApiController#getFrontendAutomationComponentInputOptions",
+            EMBEDDED_PRINCIPAL_SCOPED),
+        Map.entry(
             "embedded-v1:ConnectedUserProjectWorkflowApiController#provisionFrontendWorkflowReference",
             EMBEDDED_PRINCIPAL_SCOPED),
         Map.entry(
