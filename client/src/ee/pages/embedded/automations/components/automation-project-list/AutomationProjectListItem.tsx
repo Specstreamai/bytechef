@@ -30,12 +30,12 @@ import {
     DownloadIcon,
     EditIcon,
     EllipsisVerticalIcon,
-    LinkIcon,
     PlusIcon,
     SendIcon,
     Settings2Icon,
     Trash2Icon,
     UploadIcon,
+    UsersIcon,
     WorkflowIcon,
 } from 'lucide-react';
 import {MouseEvent, useCallback, useMemo, useRef, useState} from 'react';
@@ -43,7 +43,7 @@ import {toast} from 'sonner';
 import {twMerge} from 'tailwind-merge';
 
 import isEditableCodeLanguage from '../../utils/isEditableCodeLanguage';
-import CodeWorkflowReferencesSheet from '../CodeWorkflowReferencesSheet';
+import AutomationProjectUsageSheet from '../AutomationProjectUsageSheet';
 
 type AutomationProjectType = AutomationProjectsQuery['automationProjects'][number];
 type EmbeddedTagType = AutomationProjectTagsQuery['automationProjectTags'][number];
@@ -74,7 +74,7 @@ const AutomationProjectListItem = ({
     tags,
 }: AutomationProjectListItemProps) => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [showReferencesDialog, setShowReferencesDialog] = useState(false);
+    const [showUsageSheet, setShowUsageSheet] = useState(false);
 
     const canCreateConfiguration = useHasEmbeddedScope(
         'INTEGRATION_INSTANCE_CONFIGURATION_CREATE',
@@ -327,25 +327,22 @@ const AutomationProjectListItem = ({
                                             />
                                         ))}
 
-                                    {project.codeWorkflowProject && (
-                                        <>
-                                            {isEditableCodeLanguage(project.codeWorkflowLanguage) && (
-                                                <DropdownMenuItem
-                                                    aria-label="Edit Source"
-                                                    icon={<CodeIcon />}
-                                                    label="Edit Source"
-                                                    onClick={() => onEditProjectSource(project.id)}
-                                                />
-                                            )}
-
+                                    {project.codeWorkflowProject &&
+                                        isEditableCodeLanguage(project.codeWorkflowLanguage) && (
                                             <DropdownMenuItem
-                                                aria-label="View References"
-                                                icon={<LinkIcon />}
-                                                label="View References"
-                                                onClick={() => setShowReferencesDialog(true)}
+                                                aria-label="Edit Source"
+                                                icon={<CodeIcon />}
+                                                label="Edit Source"
+                                                onClick={() => onEditProjectSource(project.id)}
                                             />
-                                        </>
-                                    )}
+                                        )}
+
+                                    <DropdownMenuItem
+                                        aria-label="Usage"
+                                        icon={<UsersIcon />}
+                                        label="Usage"
+                                        onClick={() => setShowUsageSheet(true)}
+                                    />
 
                                     {canCreateProject && (
                                         <DropdownMenuItem
@@ -457,9 +454,10 @@ const AutomationProjectListItem = ({
                 open={showDeleteDialog}
             />
 
-            {showReferencesDialog && (
-                <CodeWorkflowReferencesSheet
-                    onClose={() => setShowReferencesDialog(false)}
+            {showUsageSheet && (
+                <AutomationProjectUsageSheet
+                    codeWorkflowProject={project.codeWorkflowProject}
+                    onClose={() => setShowUsageSheet(false)}
                     projectName={project.name}
                     workflowTemplates={project.workflowTemplates}
                 />

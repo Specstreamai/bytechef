@@ -1819,7 +1819,7 @@ export type PublishAutomationProjectMutationVariables = Exact<{
 export type PublishAutomationProjectMutation = { publishAutomationProject: boolean };
 
 export type ConnectedUserCatalogWorkflowCopiesQueryVariables = Exact<{
-  automationWorkflowUuids: Array<string | number> | string | number;
+  automationUuids: Array<string | number> | string | number;
   environmentId: string | number;
 }>;
 
@@ -9485,9 +9485,9 @@ export const usePublishAutomationProjectMutation = <
     )};
 
 export const ConnectedUserCatalogWorkflowCopiesDocument = new TypedDocumentString(`
-    query connectedUserCatalogWorkflowCopies($automationWorkflowUuids: [ID!]!, $environmentId: ID!) {
+    query connectedUserCatalogWorkflowCopies($automationUuids: [ID!]!, $environmentId: ID!) {
   connectedUserCatalogWorkflowCopies(
-    automationWorkflowUuids: $automationWorkflowUuids
+    automationUuids: $automationUuids
     environmentId: $environmentId
   ) {
     copiedFromWorkflowUuid

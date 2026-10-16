@@ -158,7 +158,7 @@ describe('AutomationProjectListItem', () => {
             await openMenu();
 
             expect(screen.getByRole('group', {name: 'Project Actions'})).toHaveTextContent(
-                'EditPublishDuplicateExport'
+                'EditPublishUsageDuplicateExport'
             );
             expect(screen.getByRole('group', {name: 'Workflow Actions'})).toHaveTextContent(
                 'New WorkflowImport WorkflowView Workflows'

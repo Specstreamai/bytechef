@@ -4902,7 +4902,7 @@ export type QueryConnectedUserArgs = {
 
 
 export type QueryConnectedUserCatalogWorkflowCopiesArgs = {
-  automationWorkflowUuids: Array<Scalars['ID']['input']>;
+  automationUuids: Array<Scalars['ID']['input']>;
   environmentId: Scalars['ID']['input'];
 };
 
