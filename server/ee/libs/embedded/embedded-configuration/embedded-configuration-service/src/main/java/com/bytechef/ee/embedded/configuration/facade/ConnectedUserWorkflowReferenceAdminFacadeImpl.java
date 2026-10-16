@@ -8,6 +8,7 @@
 package com.bytechef.ee.embedded.configuration.facade;
 
 import com.bytechef.automation.configuration.service.PermissionService;
+import com.bytechef.ee.embedded.configuration.dto.ConnectedUserWorkflowCopyDTO;
 import com.bytechef.ee.embedded.configuration.dto.ConnectedUserWorkflowReferenceDTO;
 import com.bytechef.platform.annotation.ConditionalOnEEVersion;
 import com.bytechef.platform.configuration.domain.Environment;
@@ -40,6 +41,16 @@ public class ConnectedUserWorkflowReferenceAdminFacadeImpl
 
         this.connectedUserWorkflowReferenceReader = connectedUserWorkflowReferenceReader;
         this.permissionService = permissionService;
+    }
+
+    @Override
+    @PreAuthorize("hasEmbeddedScope('CONNECTED_USER_VIEW')")
+    public List<ConnectedUserWorkflowCopyDTO> getCopies(Set<String> automationUuids, Environment environment) {
+        if (automationUuids.isEmpty() || !permissionService.hasEmbeddedScope(CONNECTED_USER_VIEW, environment)) {
+            return List.of();
+        }
+
+        return connectedUserWorkflowReferenceReader.getCopies(automationUuids, environment);
     }
 
     @Override

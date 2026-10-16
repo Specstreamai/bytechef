@@ -11,6 +11,7 @@ import com.bytechef.ee.embedded.configuration.domain.AutomationProjectConfigurat
 import com.bytechef.ee.embedded.configuration.dto.AutomationProjectDTO;
 import com.bytechef.ee.embedded.configuration.service.AutomationProjectConfigurationService;
 import com.bytechef.platform.configuration.domain.Environment;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -27,6 +28,15 @@ public final class AutomationProjectConfigurationTestSupport {
         AutomationProjectFacade automationProjectFacade,
         AutomationProjectConfigurationService automationProjectConfigurationService, long projectId) {
 
+        publishAndPinProject(
+            automationProjectFacade, automationProjectConfigurationService, projectId, List.of(Environment.PRODUCTION));
+    }
+
+    public static void publishAndPinProject(
+        AutomationProjectFacade automationProjectFacade,
+        AutomationProjectConfigurationService automationProjectConfigurationService, long projectId,
+        List<Environment> environments) {
+
         automationProjectFacade.publishProject(projectId, null);
 
         int publishedVersion = automationProjectFacade.getPublishedProjects()
@@ -36,9 +46,17 @@ public final class AutomationProjectConfigurationTestSupport {
             .findFirst()
             .orElseThrow();
 
+        for (Environment environment : environments) {
+            pinProject(automationProjectConfigurationService, projectId, publishedVersion, environment);
+        }
+    }
+
+    private static void pinProject(
+        AutomationProjectConfigurationService automationProjectConfigurationService, long projectId,
+        int publishedVersion, Environment environment) {
+
         Optional<AutomationProjectConfiguration> configurationOptional =
-            automationProjectConfigurationService.getConfigurations(
-                projectId, Environment.PRODUCTION.ordinal())
+            automationProjectConfigurationService.getConfigurations(projectId, environment.ordinal())
                 .stream()
                 .findFirst();
 
@@ -49,8 +67,8 @@ public final class AutomationProjectConfigurationTestSupport {
                 existingConfiguration.getId(), existingConfiguration.getName(),
                 existingConfiguration.getPermissionExpression(), publishedVersion, true, true);
         } else {
-            automationProjectConfigurationService.create(projectId, Environment.PRODUCTION.ordinal(), "Default",
-                null, publishedVersion, true, true);
+            automationProjectConfigurationService.create(
+                projectId, environment.ordinal(), "Default", null, publishedVersion, true, true);
         }
     }
 }
