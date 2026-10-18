@@ -8,6 +8,10 @@ export enum EditionType {
     EE = 'EE',
 }
 
+export type SocialLoginProviderType = 'github' | 'google';
+
+const SOCIAL_LOGIN_PROVIDERS: SocialLoginProviderType[] = ['github', 'google'];
+
 export interface ApplicationInfoI {
     ai: {
         copilot: {
@@ -62,6 +66,7 @@ export interface ApplicationInfoI {
     };
     socialLogin: {
         enabled: boolean;
+        providers: SocialLoginProviderType[];
     };
     templatesSubmissionForm: {
         projects: string | undefined;
@@ -77,6 +82,9 @@ export interface ApplicationInfoI {
 
 const toAllowedParentOrigins = (value: unknown): string[] =>
     Array.isArray(value) ? value.filter((origin): origin is string => typeof origin === 'string') : [];
+
+const toSocialLoginProviders = (value: unknown): SocialLoginProviderType[] =>
+    Array.isArray(value) ? SOCIAL_LOGIN_PROVIDERS.filter((provider) => value.includes(provider)) : [];
 
 const fetchGetActuatorInfo = async (): Promise<Response> => {
     return await fetch('/actuator/info', {
@@ -148,6 +156,7 @@ export const applicationInfoStore = createStore<ApplicationInfoI>()(
                         },
                         socialLogin: {
                             enabled: json.socialLogin?.enabled === 'true',
+                            providers: toSocialLoginProviders(json.socialLoginProviders),
                         },
                         templatesSubmissionForm: json.templatesSubmissionForm,
                         userGuiding: {
@@ -224,6 +233,7 @@ export const applicationInfoStore = createStore<ApplicationInfoI>()(
                 },
                 socialLogin: {
                     enabled: false,
+                    providers: [],
                 },
                 templatesSubmissionForm: {
                     projects: undefined,
