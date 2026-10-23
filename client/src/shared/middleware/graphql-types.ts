@@ -1593,6 +1593,7 @@ export type IdentityProviderType = {
   registrationId: Scalars['String']['output'];
   scimEnabled: Scalars['Boolean']['output'];
   scopes?: Maybe<Scalars['String']['output']>;
+  serviceProviderCertificate?: Maybe<Scalars['String']['output']>;
   signingCertificate?: Maybe<Scalars['String']['output']>;
   type: Scalars['String']['output'];
 };
@@ -2127,6 +2128,7 @@ export type Mutation = {
   provisionConnectedUserMcpServer?: Maybe<Scalars['Boolean']['output']>;
   provisionConnectedUserProjectWorkflows?: Maybe<Scalars['Boolean']['output']>;
   publishAutomationProject: Scalars['Boolean']['output'];
+  regenerateIdentityProviderServiceProviderCertificate: IdentityProviderType;
   removeDataTableColumn: Scalars['Boolean']['output'];
   /** Remove a user from the embedded members. */
   removeEmbeddedUser: Scalars['Boolean']['output'];
@@ -2881,6 +2883,11 @@ export type MutationProvisionConnectedUserProjectWorkflowsArgs = {
 
 export type MutationPublishAutomationProjectArgs = {
   description?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationRegenerateIdentityProviderServiceProviderCertificateArgs = {
   id: Scalars['ID']['input'];
 };
 
