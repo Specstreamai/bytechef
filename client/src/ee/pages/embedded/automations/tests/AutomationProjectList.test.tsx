@@ -584,6 +584,10 @@ describe('AutomationProjectList', () => {
 
             renderWithProviders(<AutomationProjectList {...defaultProps} projects={projects} />);
 
+            await user.click(screen.getByText('1 workflow'));
+
+            await screen.findByText(workflowTemplate.label);
+
             expect(screen.queryByRole('button', {name: /create workflow/i})).not.toBeInTheDocument();
             expect(screen.queryByRole('button', {name: /more workflow creation actions/i})).not.toBeInTheDocument();
 
