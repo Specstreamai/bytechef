@@ -1695,7 +1695,7 @@ class AutomationProjectFacadeIntTest {
             automationProjectCodeWorkflowFacade.save(
                 jsSource(projectName, "uploaded", "alpha", "beta")
                     .getBytes(StandardCharsets.UTF_8),
-                Language.JAVASCRIPT);
+                Language.JAVASCRIPT, Environment.PRODUCTION, false);
 
             long projectId = automationProjectFacade.fetchProjectIdByName(projectName)
                 .orElseThrow();
@@ -1710,7 +1710,7 @@ class AutomationProjectFacadeIntTest {
             String upload = jsSource(projectName, "second upload", "alpha", "beta");
 
             automationProjectCodeWorkflowFacade.save(
-                upload.getBytes(StandardCharsets.UTF_8), Language.JAVASCRIPT);
+                upload.getBytes(StandardCharsets.UTF_8), Language.JAVASCRIPT, Environment.PRODUCTION, false);
 
             assertThat(getLatestWorkflowUuidsByName(projectId)).isEqualTo(publishedUuids);
             assertThat(getPublishedSource(projectId)).isEqualTo(upload);
@@ -1728,7 +1728,7 @@ class AutomationProjectFacadeIntTest {
             automationProjectCodeWorkflowFacade.save(
                 jsSource(projectName, "uploaded", "alpha", "beta")
                     .getBytes(StandardCharsets.UTF_8),
-                Language.JAVASCRIPT);
+                Language.JAVASCRIPT, Environment.PRODUCTION, false);
 
             long projectId = automationProjectFacade.fetchProjectIdByName(projectName)
                 .orElseThrow();
