@@ -1893,7 +1893,9 @@ class AutomationProjectFacadeIntTest {
         }
 
         @Configuration
-        @Import(AutomationProjectFacadeIntTestConfiguration.class)
+        @Import({
+            AutomationProjectFacadeIntTestConfiguration.class, ConnectedUserServiceConfiguration.class
+        })
         static class CodeProjectLifecycleConfiguration {
 
             @Bean

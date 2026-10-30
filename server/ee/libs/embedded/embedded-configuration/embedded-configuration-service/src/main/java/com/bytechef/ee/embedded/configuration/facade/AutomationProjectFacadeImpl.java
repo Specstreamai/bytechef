@@ -361,6 +361,7 @@ public class AutomationProjectFacadeImpl implements AutomationProjectFacade {
     }
 
     @Override
+    @PreAuthorize("isTenantAdmin()")
     public Optional<Long> fetchProjectIdByName(String name) {
         Map<Long, AutomationProject> automationProjects = getAutomationProjects();
 
