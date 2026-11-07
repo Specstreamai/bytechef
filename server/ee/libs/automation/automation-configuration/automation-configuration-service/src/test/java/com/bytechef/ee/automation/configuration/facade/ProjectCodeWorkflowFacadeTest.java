@@ -37,11 +37,13 @@ import com.bytechef.ee.platform.codeworkflow.configuration.domain.CodeWorkflowCo
 import com.bytechef.ee.platform.codeworkflow.configuration.service.CodeWorkflowContainerService;
 import com.bytechef.ee.platform.codeworkflow.file.storage.CodeWorkflowFileStorage;
 import com.bytechef.platform.codeworkflow.loader.automation.ProjectHandlerLoader;
+import com.bytechef.platform.configuration.domain.Environment;
 import com.bytechef.platform.configuration.facade.ComponentConnectionFacade;
 import com.bytechef.platform.security.web.expression.MethodSecurityExpressionContributor;
 import com.bytechef.platform.tag.service.TagService;
 import java.util.List;
 import java.util.Optional;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
@@ -146,20 +148,37 @@ class ProjectCodeWorkflowFacadeTest {
 
     @Test
     void testSaveAllowsWhenBothProjectCreateAndPublishScopesAreGranted() {
-        assertSaveGuard(true, true);
+        assertSaveGuard(true, true, false);
     }
 
     @Test
     void testSaveDeniesWhenTheProjectCreateScopeIsRefused() {
-        assertSaveGuard(false, true);
+        assertSaveGuard(false, true, false);
     }
 
     @Test
     void testSaveDeniesWhenTheProjectPublishScopeIsRefused() {
-        assertSaveGuard(true, false);
+        assertSaveGuard(true, false, false);
     }
 
-    private void assertSaveGuard(boolean projectCreateGranted, boolean projectPublishGranted) {
+    @Test
+    void testSaveWithEnvironmentAllowsWhenBothProjectCreateAndPublishScopesAreGranted() {
+        assertSaveGuard(true, true, true);
+    }
+
+    @Test
+    void testSaveWithEnvironmentDeniesWhenTheProjectCreateScopeIsRefused() {
+        assertSaveGuard(false, true, true);
+    }
+
+    @Test
+    void testSaveWithEnvironmentDeniesWhenTheProjectPublishScopeIsRefused() {
+        assertSaveGuard(true, false, true);
+    }
+
+    private void assertSaveGuard(
+        boolean projectCreateGranted, boolean projectPublishGranted, boolean withEnvironment) {
+
         PermissionService permissionService = mock(PermissionService.class);
 
         when(permissionService.hasResourceScope(WORKSPACE_ID, RESOURCE_TYPE, "PROJECT_CREATE"))
@@ -182,15 +201,17 @@ class ProjectCodeWorkflowFacadeTest {
                 .when(() -> ProjectHandlerLoader.loadProjectHandler(any(), any(), anyString(), any()))
                 .thenThrow(new IllegalStateException(BODY_REACHED));
 
+            ThrowingCallable save = withEnvironment
+                ? () -> securedProjectCodeWorkflowFacade.save(
+                    WORKSPACE_ID, new byte[0], Language.JAVA, Environment.STAGING, true)
+                : () -> securedProjectCodeWorkflowFacade.save(WORKSPACE_ID, new byte[0], Language.JAVA);
+
             if (projectCreateGranted && projectPublishGranted) {
-                assertThatThrownBy(
-                    () -> securedProjectCodeWorkflowFacade.save(WORKSPACE_ID, new byte[0], Language.JAVA))
-                        .isInstanceOf(IllegalStateException.class)
-                        .hasMessage(BODY_REACHED);
+                assertThatThrownBy(save)
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage(BODY_REACHED);
             } else {
-                assertThatThrownBy(
-                    () -> securedProjectCodeWorkflowFacade.save(WORKSPACE_ID, new byte[0], Language.JAVA))
-                        .isInstanceOf(AccessDeniedException.class);
+                assertThatThrownBy(save).isInstanceOf(AccessDeniedException.class);
 
                 projectHandlerLoaderMockedStatic.verifyNoInteractions();
             }

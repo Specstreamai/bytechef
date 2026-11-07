@@ -201,6 +201,7 @@ class ProjectFacadeVisibilityTest {
         return facade(edition, new ResourceVisibilityPolicyRegistry(List.of(new ProjectVisibilityPolicy())));
     }
 
+    @SuppressWarnings("unchecked")
     private ProjectFacadeImpl facade(
         String edition, ResourceVisibilityPolicyRegistry resourceVisibilityPolicyRegistry) {
 
