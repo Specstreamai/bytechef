@@ -361,7 +361,7 @@ public class AutomationProjectFacadeImpl implements AutomationProjectFacade {
     }
 
     @Override
-    @PreAuthorize("isTenantAdmin()")
+    @PreAuthorize("hasEmbeddedScope('WORKFLOW_VIEW')")
     public Optional<Long> fetchProjectIdByName(String name) {
         Map<Long, AutomationProject> automationProjects = getAutomationProjects();
 

@@ -397,7 +397,8 @@ public class IntegrationInstanceConfigurationFacadeImpl implements IntegrationIn
     }
 
     @Override
-    @PreAuthorize("isTenantAdmin()")
+    @PreAuthorize("hasEmbeddedScopeInEnvironment('INTEGRATION_INSTANCE_CONFIGURATION_CREATE', #environment) and "
+        + "hasEmbeddedScopeInEnvironment('INTEGRATION_INSTANCE_CONFIGURATION_EDIT', #environment)")
     public long enableIntegrationVersion(long integrationId, int integrationVersion, Environment environment) {
         List<IntegrationInstanceConfiguration> integrationInstanceConfigurations =
             integrationInstanceConfigurationService.getIntegrationInstanceConfigurations(
