@@ -397,6 +397,12 @@ public class IntegrationInstanceConfigurationFacadeImpl implements IntegrationIn
     }
 
     @Override
+    @Audited(event = IntegrationAuditEvents.INTEGRATION_INSTANCE_CONFIGURATION_UPDATED, data = {
+        @AuditData(key = "integrationInstanceConfigurationId", value = "#result"),
+        @AuditData(key = "integrationId", value = "#integrationId"),
+        @AuditData(key = "integrationVersion", value = "#integrationVersion"),
+        @AuditData(key = "environment", value = "#environment")
+    })
     @PreAuthorize("hasEmbeddedScopeInEnvironment('INTEGRATION_INSTANCE_CONFIGURATION_CREATE', #environment) and "
         + "hasEmbeddedScopeInEnvironment('INTEGRATION_INSTANCE_CONFIGURATION_EDIT', #environment)")
     public long enableIntegrationVersion(long integrationId, int integrationVersion, Environment environment) {

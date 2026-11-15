@@ -73,6 +73,12 @@ public class CustomComponentFacadeImpl implements CustomComponentFacade {
     }
 
     @Override
+    @Audited(event = CustomComponentAuditEvents.CUSTOM_COMPONENT_SAVED, data = {
+        @AuditData(key = "customComponentId", value = "#result?.id"),
+        @AuditData(key = "name", value = "#result?.name"),
+        @AuditData(key = "version", value = "#result?.componentVersion"),
+        @AuditData(key = "language", value = "#result?.language")
+    })
     @PreAuthorize("hasAuthority(\"" + AuthorityConstants.ADMIN + "\")")
     public CustomComponent createEmptyCustomComponent(String name, Language language) {
         if (name == null || name.isBlank() || name.indexOf('"') >= 0 || name.indexOf('\\') >= 0
@@ -235,12 +241,23 @@ public class CustomComponentFacadeImpl implements CustomComponentFacade {
     }
 
     @Override
+    @Audited(event = CustomComponentAuditEvents.CUSTOM_COMPONENT_PUBLISHED, data = {
+        @AuditData(key = "customComponentId", value = "#id"),
+        @AuditData(key = "name", value = "#result?.name"),
+        @AuditData(key = "version", value = "#result?.componentVersion")
+    })
     @PreAuthorize("hasAuthority(\"" + AuthorityConstants.ADMIN + "\")")
     public CustomComponent publishCustomComponent(long id) {
         return customComponentService.publishCustomComponent(id);
     }
 
     @Override
+    @Audited(event = CustomComponentAuditEvents.CUSTOM_COMPONENT_SAVED, data = {
+        @AuditData(key = "customComponentId", value = "#result?.id"),
+        @AuditData(key = "name", value = "#result?.name"),
+        @AuditData(key = "version", value = "#result?.componentVersion"),
+        @AuditData(key = "language", value = "#result?.language")
+    })
     @PreAuthorize("hasAuthority(\"" + AuthorityConstants.ADMIN + "\")")
     public CustomComponent updateCustomComponentSource(long id, String content) {
         CustomComponent customComponent = customComponentService.getCustomComponent(id);
